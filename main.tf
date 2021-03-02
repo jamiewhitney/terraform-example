@@ -6,6 +6,21 @@ data "aws_route53_zone" "main" {
   name = var.domainName
 }
 
+data "aws_ami" "latest-ubuntu" {
+  most_recent = true
+  owners      = ["099720109477"]
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
 locals {
   user_data = <<EOF
 #!/bin/bash
@@ -41,8 +56,8 @@ module "autoscaling_instances" {
   source = "./modules/asg"
 
   name            = var.name
-  ami             = "ami-0823c236601fef765"
-  instance_type   = "t1.micro"
+  ami             = data.aws_ami.latest-ubuntu.image_id
+  instance_type   = var.instancetype
   vpc_id          = module.vpc.vpc_id
   security_groups = aws_security_group.ec2-http.id
   alb             = aws_alb_target_group.foo.arn

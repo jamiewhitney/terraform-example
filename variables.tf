@@ -19,3 +19,5 @@ variable "tags" {
 variable "domainName" {}
 
 variable "region" {}
+
+variable "instancetype" {}
